@@ -3,10 +3,9 @@ package com.roncho.engine.structs.events;
 import java.util.ArrayList;
 
 public class Event<T> {
-
     public interface IFunctionReference<T> { void invoke(T in); }
 
-    ArrayList<IFunctionReference<T>> listeners;
+    private final ArrayList<IFunctionReference<T>> listeners;
 
     public Event(){
         listeners = new ArrayList<>();

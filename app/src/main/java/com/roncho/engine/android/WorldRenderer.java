@@ -1,22 +1,23 @@
 package com.roncho.engine.android;
 
-import android.content.QuickViewConstants;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 
-import com.roncho.engine.ObjectFactory;
 import com.roncho.engine.gl.objects.Camera;
 import com.roncho.engine.gl.Shader;
 import com.roncho.engine.gl.objects.GLDrawable;
-import com.roncho.engine.gl.objects.UIObject;
+import com.roncho.engine.gl.objects.UiObject;
 import com.roncho.engine.gl.objects.WorldObject;
+import com.roncho.engine.helpers.FrameRateLogger;
 import com.roncho.engine.helpers.Screen;
+import com.roncho.engine.helpers.Time;
 import com.roncho.engine.structs.Mesh;
 import com.roncho.engine.structs.primitive.Color;
 import com.roncho.engine.structs.primitive.Int2;
 import com.roncho.engine.structs.primitive.Vector2;
 import com.roncho.engine.structs.primitive.Vector3;
-import com.roncho.engine.templates.UiText;
+import com.roncho.engine.templates.ui.FpsText;
+import com.roncho.engine.templates.ui.UiButton;
 
 import java.util.ArrayList;
 
@@ -28,11 +29,14 @@ public class WorldRenderer implements GLSurfaceView.Renderer {
     private static Shader worldVertexShader, worldFragmentShader, uiVertexShader, uiFragmentShader;
 
     private ArrayList<WorldObject> GLDrawables;
-    private ArrayList<UIObject> uio;
+    private ArrayList<UiObject> uio;
     public static Camera camera;
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
+        Time.begin();
+        FrameRateLogger.init(60);
+
         GLDrawables = new ArrayList<>();
 
         WorldObject.ambientIntensity = Vector3.One.scale(.2f);
@@ -78,14 +82,21 @@ public class WorldRenderer implements GLSurfaceView.Renderer {
         //GLDrawables.add(y);
 
         uio = new ArrayList<>();
-        UIObject h = new UiText("impact.ttf", "ignfxq IGNf");
+        UiObject fpsRecorder = new FpsText("impact.ttf", new Vector2(-.9f, .9f));
+        fpsRecorder.tint = Color.black();
         //h.makeProgram(uiVertexShader, uiFragmentShader);
-        uio.add(h);
+        uio.add(fpsRecorder);
+        UiButton button = new UiButton(new Vector2(0, 0), new Vector2(.5f, .25f), "Epic Fortnite", "impact.ttf");
+        button.text.transform.scale = button.text.transform.scale.scale(2);
+        button.recenterText();
+        uio.add(button);
     }
 
     @Override
     public void onDrawFrame(GL10 gl10) {
         if(worldVertexShader.isFailure() || worldFragmentShader.isFailure()) return;
+
+        Time.update();
 
         GLES20.glClearColor(0f, 1f, 1f, 1f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
@@ -98,27 +109,28 @@ public class WorldRenderer implements GLSurfaceView.Renderer {
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         for(WorldObject d : GLDrawables){
             d.draw(mvpMatrix);
-            d.transform.rotation.rotate(.2f, 1, 1, 1);
+            d.transform.rotation.rotate(15 * Time.deltaTime(), 1, 1, 1);
         }
 
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
         GLES20.glEnable(GLES20.GL_BLEND);
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         mvpMatrix = camera.getOrthographicMatrix();
-        for(UIObject ui : uio){
+        for(UiObject ui : uio){
             ui.draw(mvpMatrix);
-            ui.transform.angle++;
         }
         GLES20.glDisable(GLES20.GL_BLEND);
         //uio.transform.angle += .1f;
+
+        FrameRateLogger.record();
     }
 
     private native void passPrivateComponents(float[] cameraForwards);
     private native void setup(int width, int height);
 
-    public static GLDrawable create(UIObject other){
-        UIObject uio = other.clone();
+    public static GLDrawable create(UiObject other){
+        UiObject uio = other.clone();
         uio.makeProgram(uiVertexShader, uiFragmentShader);
-       return uio;
+        return uio;
     }
 }

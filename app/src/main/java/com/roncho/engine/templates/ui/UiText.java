@@ -1,44 +1,86 @@
-package com.roncho.engine.templates;
+package com.roncho.engine.templates.ui;
 
 import android.opengl.GLES20;
 
-import com.roncho.engine.android.AssetHandler;
 import com.roncho.engine.gl.Shader;
-import com.roncho.engine.gl.objects.UIObject;
+import com.roncho.engine.gl.objects.UiObject;
 import com.roncho.engine.gl.text.TextAtlas;
 import com.roncho.engine.helpers.Builder;
+import com.roncho.engine.helpers.MathF;
+import com.roncho.engine.structs.primitive.Vector2;
 
 import java.nio.FloatBuffer;
 
-public class UiText extends UIObject {
+public class UiText extends UiObject {
 
-    private static Shader vertexShader, fragmentShader;
+    public static final byte F_DONT_CALCULATE_SIZE = 1;
 
-    private static void loadShaders(){
-        vertexShader = Shader.load("ui/text_vertex.vert");
-        fragmentShader = Shader.load("ui/fragment.frag");
-    }
+    protected final static Shader vertexShader = Shader.load("ui/text_vertex.vert");
 
     public class TextComponent {
+
         private TextAtlas atlas;
         private String text;
 
+        public final Vector2 size;
+
         public TextComponent(String font, String text){
             atlas = TextAtlas.loadAtlas(font);
-            this.text = text;
             texture = atlas;
+            size = Vector2.Zero.copy();
+            setText(text);
         }
+
+        public boolean loadAtlas(String font){
+            atlas = TextAtlas.loadAtlas(font);
+            texture = atlas;
+            return true;
+        }
+
+        public void setText(String text) {
+            this.text = text;
+
+            // Check if should recalculate the text coordinates
+            if(hasFlag(F_DONT_CALCULATE_SIZE)) return;
+
+            size.x = 0;
+            size.y = 0;
+            float width = 0;
+            for(char c : text.toCharArray()){
+                switch (c) {
+                    case ' ':
+                        width += atlas.space();
+                        break;
+                    case '\n':
+                        size.x = MathF.max(width, size.x);
+                        size.y -= atlas.newline() * 1.5f;
+                        break;
+                    default:
+                        TextAtlas.Glyph glyph = atlas.getChar(c);
+                        if(glyph == null){
+                            break;
+                        }
+
+                        width += glyph.scaledSize.z;
+                        break;
+                }
+            }
+            size.x = MathF.max(width, size.x);
+        }
+        public String getText() { return text; }
     }
 
     public TextComponent text;
 
+    protected short flags;
     private int internalPositionHandle, internalScaleHandle, internalAngleHandle, matrixHandle;
 
     public UiText(String font, String text){
         super();
+        flags = 0;
+
         this.text = new TextComponent(font, text);
 
-        if(vertexShader == null || fragmentShader == null) loadShaders();
         makeProgram(vertexShader, fragmentShader);
     }
 
@@ -96,5 +138,15 @@ public class UiText extends UIObject {
         closeShader(mvpMatrix);
     }
 
-    private native void drawUnit(float[] mvpMatrix);
+    public boolean hasFlag(byte flag){
+        return (flag & flags) != 0;
+    }
+
+    public void enable(byte flag){
+        flags |= flag;
+    }
+
+    public void disable(byte flag){
+        flags &= ~flag;
+    }
 }

@@ -1,32 +1,25 @@
 package com.roncho.engine.structs.events;
 
+import android.view.MotionEvent;
+
+import com.roncho.engine.helpers.Screen;
 import com.roncho.engine.structs.primitive.Vector2;
 
-import java.util.ArrayList;
+public class TouchEvent extends Event<TouchEvent.TouchEventInfo> {
 
-public class TouchEvent {
+    public static class TouchEventInfo {
+        public final MotionEvent event;
+        public final Vector2 position;
 
-    public interface IFunctionReference { void invoke(Vector2 in); }
+        public boolean used = false;
 
-    private ArrayList<IFunctionReference> listeners;
+        public TouchEventInfo(MotionEvent event){
+            this.event = event;
+            position = new Vector2(event.getX() / Screen.width() * 2 - 1, event.getY() / Screen.height() * 2 - 1);
+        }
 
-    public TouchEvent(){
-        listeners = new ArrayList<>();
-    }
-
-    public void add(IFunctionReference listener){
-        listeners.add(listener);
-    }
-
-    public void remove(IFunctionReference listener){
-        listeners.remove(listener);
-    }
-
-    public void invoke(Vector2 value){
-        for(IFunctionReference listener : listeners) listener.invoke(value);
-    }
-
-    public void clear() {
-        listeners.clear();
+        public void use(){
+            used = true;
+        }
     }
 }

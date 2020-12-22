@@ -1,24 +1,23 @@
 package com.roncho.engine.gl.objects;
 
 import android.opengl.GLES20;
-import android.opengl.Matrix;
 
-import com.roncho.engine.gl.text.TextAtlas;
+import com.roncho.engine.gl.Shader;
 import com.roncho.engine.helpers.Builder;
 import com.roncho.engine.helpers.MathF;
 import com.roncho.engine.structs.ComponentBase;
-import com.roncho.engine.structs.Mesh;
 import com.roncho.engine.structs.Texture2D;
 import com.roncho.engine.structs.primitive.Color;
-import com.roncho.engine.structs.primitive.Rect;
 import com.roncho.engine.structs.primitive.Vector2;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UIObject extends GLDrawable {
+public class UiObject extends GLDrawable {
 
+    protected final static Shader vertexShader = Shader.load("ui/vertex.vert"),
+        fragmentShader = Shader.load("ui/fragment.frag");
 
     protected int positionAttributeHandle, uvHandle, textureHandle, tintHandle;
 
@@ -36,9 +35,14 @@ public class UIObject extends GLDrawable {
         public Transform()
         {
             scale = new Vector2(1, 1f);
-            position = new Vector2(-1f, 1f);
+            position = new Vector2(0f, 0f);
             buffer = new float[5];
         }
+
+        public float minX() { return position.x - scale.x; }
+        public float maxX() { return position.x + scale.x; }
+        public float minY() { return position.y - scale.y; }
+        public float maxY() { return position.y + scale.y; }
 
         private void setupHandles(){
             positionHandle = GLES20.glGetUniformLocation(program, "transform.position");
@@ -69,24 +73,22 @@ public class UIObject extends GLDrawable {
         }
     }
 
-    protected abstract class Component extends ComponentBase { }
+    protected static abstract class Component extends ComponentBase { }
 
     protected static FloatBuffer quad, uvs;
 
-    public Transform transform;
+    public final Transform transform;
     public Texture2D texture;
     public Color tint;
 
-    public List<UIObject> children;
+    public List<UiObject> children;
 
     private final List<Component> components;
 
-    public UIObject(){
-        //TextAtlas atlas = TextAtlas.loadAtlas("ADDECRG.TTF");
+    public UiObject(){
 
         // Prepare the static quad
         if(quad == null) {
-            //uvs = Builder.makeRectBuffer(atlas.getChar('"'));
             quad = Builder.newFloatBuffer(8); uvs = Builder.newFloatBuffer(8);
             quad.put(-1f);  uvs.put(0);
             quad.put(1f);   uvs.put(0);
@@ -150,7 +152,7 @@ public class UIObject extends GLDrawable {
     }
 
     protected void closeShader(float[] mvpMatrix) {
-        for(UIObject object : children) {
+        for(UiObject object : children) {
             object.transform.inherit(transform);
             object.draw(mvpMatrix);
         }
@@ -158,8 +160,8 @@ public class UIObject extends GLDrawable {
         transform.resetBuffer();
     }
 
-    public UIObject clone(){
-        UIObject n = new UIObject();
+    public UiObject clone(){
+        UiObject n = new UiObject();
         // Property cloning
         n.transform.position = transform.position.copy();
         n.transform.scale = transform.scale.copy();
@@ -168,7 +170,7 @@ public class UIObject extends GLDrawable {
         n.tint = tint.copy();
 
         // Preform depth cloning
-        for(UIObject obj : children){
+        for(UiObject obj : children){
             n.children.add(obj.clone());
         }
 
