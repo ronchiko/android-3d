@@ -24,7 +24,13 @@ public class Rect {
     }
 
     public float[] toArray(){
-        Logger.Log( "Rect: " + position + ", (" + endX() + ", " + endY() + ")");
+        // Logger.Log( "Rect: " + position + ", (" + endX() + ", " + endY() + ")");
         return new float[]{position.x, position.y, endX(), endY()};
     }
+
+    public float width() { return size.x; }
+    public float height() { return size.y; }
+
+    public float xMax() { return position.x + size.x; }
+    public float yMax() { return position.y + size.y; }
 }

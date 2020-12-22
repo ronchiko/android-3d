@@ -463,4 +463,11 @@ Java_com_roncho_engine_structs_primitive_Quaternion_parse(JNIEnv* env, jclass cl
     return color;
 }
 
+extern "C" JNIEXPORT jfloat JNICALL Java_com_roncho_engine_helpers_MathF_min(JNIEnv*, jclass, jfloat a, jfloat b){
+    return a > b ? b : a;
+}
+extern "C" JNIEXPORT jfloat JNICALL Java_com_roncho_engine_helpers_MathF_max(JNIEnv*, jclass, jfloat a, jfloat b){
+    return a < b ? b : a;
+}
+
 #include "uitext.h"

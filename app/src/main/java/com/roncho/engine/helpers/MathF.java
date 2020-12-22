@@ -57,4 +57,7 @@ public class MathF {
         v *= mul;
         return ((int)v) / mul;
     }
+
+    public static native float min(float a, float b);
+    public static native float max(float a, float b);
 }

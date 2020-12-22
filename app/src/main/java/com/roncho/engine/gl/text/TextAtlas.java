@@ -6,21 +6,44 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.Typeface;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 
 import com.roncho.engine.android.AssetHandler;
+import com.roncho.engine.helpers.MathF;
+import com.roncho.engine.helpers.Screen;
 import com.roncho.engine.structs.Texture2D;
 import com.roncho.engine.structs.primitive.Rect;
+import com.roncho.engine.structs.primitive.Vector2;
+import com.roncho.engine.structs.primitive.Vector3;
 
 import java.util.HashMap;
 import java.util.Objects;
 
 public class TextAtlas extends Texture2D {
-    private final static String Characters = "`1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./~!@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:\"|ZXCVBNM<>?";
+    private final static String Characters = "1 2 3 4 5 6 7 8 9 0 - = q  w e r t y u i o p [ ] a s d f g h j k l ; ' \\ z x c v b n m , . / ~ ! @ # $ % ^ & * ( ) _ + Q W E R T Y U I O P  { } A S D F G H J K L : | Z X C V B N M < > ? \"";
     private final static HashMap<String, TextAtlas> Cache = new HashMap<>();
 
-    private final HashMap<Character, Rect> glyphs;
+    private final HashMap<Character, Glyph> glyphs;
+
+    private final float spaceJump, newlineJump;
+
+    private static class Pair {
+        public int start;
+        public int charStart;
+        public int end;
+    }
+
+    public static class Glyph {
+        public final Rect rect;
+        public final Vector3 scaledSize;
+
+        public Glyph(Rect rect, Vector3 scaledSize){
+            this.rect = rect;
+            this.scaledSize = scaledSize;
+        }
+    }
 
     private TextAtlas (String font, float size){
         super();
@@ -33,7 +56,8 @@ public class TextAtlas extends Texture2D {
         textPainter.setTextSize(size);
         textPainter.setFakeBoldText(false);
         textPainter.setAntiAlias(true);
-        textPainter.setTypeface(AssetHandler.loadFont(font));
+        FontInfo font_ = AssetHandler.loadFont(font);
+        textPainter.setTypeface(font_.getFont());
         textPainter.setARGB(255, 255, 255, 255);
 
         textPainter.setSubpixelText(true);
@@ -55,37 +79,64 @@ public class TextAtlas extends Texture2D {
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
 
         int x = 0;
+        newlineJump = size / Screen.height() * 2;
+        spaceJump = newlineJump;
         for(char c : Characters.toCharArray()){
-            int solidCount = 0;
-            while (solidCount <= 0 && x < textureWidth){
-                solidCount = 0;
-                for(int y = 0; y < textureHeight; y++){
-                    if(Color.alpha(texture.getPixel(x, y)) != 0) solidCount++;
-                }
-                x++;
+            if(font_.getEmptyChars().indexOf(c) != -1
+                || c == ' ') continue;
+
+            Pair pair = scanCharacter(x, textureWidth, textureHeight, texture);
+            int startX = pair.charStart;
+            int width = pair.end - pair.charStart;
+            if(c == '\"') {
+                x = pair.end;
+                pair = scanCharacter(x, textureWidth, textureHeight, texture);
+                width += pair.end - pair.start;
             }
-            int sx = x;
-            while (solidCount > 0 && x < textureWidth){
-                solidCount = 0;
-                for(int y = 0; y < textureHeight; y++){
-                    if(Color.alpha(texture.getPixel(x, y)) != 0) solidCount++;
-                }
-                x++;
-            }
-            int width = x - sx;
-            glyphs.put(c, new Rect((float)sx / textureWidth, 0, (float)width / textureWidth, 1));
+            x = pair.end;
+
+            float xScale = (width) / size;
+            Rect rect = new Rect((float)startX / textureWidth, 0, (float)width / textureWidth, 1);
+            Vector3 scaledSize = new Vector3(newlineJump * xScale, newlineJump,
+                    newlineJump * MathF.max(width * 2, size * .8f) / size);
+            glyphs.put(c, new Glyph(rect, scaledSize));
         }
 
         texture.recycle();
     }
 
+    private Pair scanCharacter(int x, int tWidth, int tHeight, Bitmap texture){
+        Pair pair = new Pair();
+        pair.start = x;
+        int solidCount = 0;
+        while (solidCount <= 0 && x < tWidth){
+            solidCount = 0;
+            for(int y = 0; y < tHeight; y++){
+                if(Color.alpha(texture.getPixel(x, y)) != 0) solidCount++;
+            }
+            x++;
+        }
+        pair.charStart = x;
+        while (solidCount > 0 && x < tWidth){
+            solidCount = 0;
+            for(int y = 0; y < tHeight; y++){
+                if(Color.alpha(texture.getPixel(x, y)) != 0) solidCount++;
+            }
+            x++;
+        }
+        pair.end = x;
+        return pair;
+    }
 
     public static TextAtlas loadAtlas(String font){
         return new TextAtlas(font, 24);
     }
 
-    public float[] getChar(char c){
+    public Glyph getChar(char c){
         if(!glyphs.containsKey(c)) return null;
-        return Objects.requireNonNull(glyphs.get(c)).toArray();
+        return Objects.requireNonNull(glyphs.get(c));
     }
+
+    public float space() { return spaceJump; }
+    public float newline() { return newlineJump; }
 }

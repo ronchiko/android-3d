@@ -44,6 +44,11 @@ inline jobject getObject(JNIEnv* env, jobject slf, const char* clazz, const char
 #define getString(env, slf, clazz, field, sig) static_cast<jstring>(getObject(env, slf, clazz, field, sig))
 
 extern "C" JNIEXPORT void JNICALL
+Java_com_roncho_engine_android_WorldRenderer_setup(JNIEnv* env, jobject, jint width, jint height){
+    glViewport(0, 0, width, height);
+}
+
+extern "C" JNIEXPORT void JNICALL
 Java_com_roncho_engine_templates_UiText_drawUnit(JNIEnv* env, jobject slf, jfloatArray mvp){
     /** Get the text from the java object */
     jobject textComponent = getObject(env, slf, "uitext", "text", "Lcom/roncho/engine/templates/UiText$TextComponent;");
@@ -60,8 +65,7 @@ Java_com_roncho_engine_templates_UiText_drawUnit(JNIEnv* env, jobject slf, jfloa
 
     jmethodID getCharId = env->GetMethodID(env->GetObjectClass(atlas), "getChar", "(C)[F");
 
-    glEnableVertexAttribArray(positionAttributeHandle);
-    glEnableVertexAttribArray(uvAttributeHandle);
+
 
     float* vertexArray = new float[4];
     float* uvs = new float[8] { 0, 0, 1, 0, 0, 1, 1, 1};
@@ -69,15 +73,25 @@ Java_com_roncho_engine_templates_UiText_drawUnit(JNIEnv* env, jobject slf, jfloa
 
     const int match[8] = {0, 1, 2, 1, 0, 3, 2, 3};
 
+    glVertexAttribPointer(positionAttributeHandle, 2, GL_FLOAT, GL_FALSE, 0, &pos);
+    glVertexAttribPointer(uvAttributeHandle, 2, GL_FLOAT, GL_FALSE, 0, &uvs);
+
+    glEnableVertexAttribArray(positionAttributeHandle);
+    glEnableVertexAttribArray(uvAttributeHandle);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    LOGI("%s - %i %i", text.c_str(), positionAttributeHandle, uvAttributeHandle);
+    /*
     for(auto& c : text){
-        /** Get the correct uvs uvs */
+        *//** Get the correct uvs uvs *//*
         jfloatArray uvsArray = static_cast<jfloatArray>(env->CallObjectMethod(atlas, getCharId, static_cast<jchar>(c)));
         jfloat* tileUvs = env->GetFloatArrayElements(uvsArray, JNI_FALSE);
 
-        /** Move to the gl buffer array */
+        *//** Move to the gl buffer array *//*
         for(int i = 0; i < 8; i++) uvs[i] = tileUvs[match[i]];
 
-        /** Perform drawing */
+        *//** Draw *//*
         glVertexAttribPointer(uvAttributeHandle, 2, GL_FLOAT, GL_FALSE, 0, &uvs);
         glVertexAttribPointer(positionAttributeHandle, 2, GL_FLOAT, GL_FALSE, 0, &pos);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -86,16 +100,17 @@ Java_com_roncho_engine_templates_UiText_drawUnit(JNIEnv* env, jobject slf, jfloa
         for(int i = 0; i < 8; i+= 2){
             ss << "(" << uvs[i] << "," << uvs[i + 1] << ")";
         }
-        //LOGI("%s", ss.str().c_str());
-    }
+        LOGI("%s", ss.str().c_str());
+    }*/
 
     /** Disable the used arrays */
-    glDisableVertexAttribArray(positionAttributeHandle);
-    glDisableVertexAttribArray(uvAttributeHandle);
+   /* glDisableVertexAttribArray(positionAttributeHandle);
+    glDisableVertexAttribArray(uvAttributeHandle);*/
 
     /** Cleanup */
     delete[] uvs;
     delete[] vertexArray;
+    delete[] pos;
 }
 
 #endif

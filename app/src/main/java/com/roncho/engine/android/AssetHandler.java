@@ -6,6 +6,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 
+import com.roncho.engine.gl.text.FontInfo;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -81,7 +83,9 @@ public class AssetHandler {
      * @param path
      * @return
      */
-    public static Typeface loadFont(String path){
-        return Typeface.createFromAsset(assets, FONTS_PATH + path);
+    public static FontInfo loadFont(String path){
+        Typeface font = Typeface.createFromAsset(assets, FONTS_PATH + path);
+        String echars = loadText(FONTS_PATH + path + ".DT");
+        return new FontInfo(font, echars);
     }
 }

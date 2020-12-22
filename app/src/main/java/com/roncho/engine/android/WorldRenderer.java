@@ -10,8 +10,10 @@ import com.roncho.engine.gl.Shader;
 import com.roncho.engine.gl.objects.GLDrawable;
 import com.roncho.engine.gl.objects.UIObject;
 import com.roncho.engine.gl.objects.WorldObject;
+import com.roncho.engine.helpers.Screen;
 import com.roncho.engine.structs.Mesh;
 import com.roncho.engine.structs.primitive.Color;
+import com.roncho.engine.structs.primitive.Int2;
 import com.roncho.engine.structs.primitive.Vector2;
 import com.roncho.engine.structs.primitive.Vector3;
 import com.roncho.engine.templates.UiText;
@@ -43,23 +45,7 @@ public class WorldRenderer implements GLSurfaceView.Renderer {
         uiVertexShader = Shader.load("ui/vertex.vert");
         uiFragmentShader = Shader.load("ui/fragment.frag");
 
-        camera = new Camera();
 
-        WorldObject x = new WorldObject();
-        x.makeProgram(worldVertexShader, worldFragmentShader);
-        WorldObject y = new WorldObject();
-        y.makeProgram(worldVertexShader, worldFragmentShader);
-        y.mesh = Mesh.load("samples/cube.obj");
-        y.transform.scale = Vector3.One.scale(1.2f);
-
-        x.children.add(y);
-        GLDrawables.add(x);
-        //GLDrawables.add(y);
-
-        uio = new ArrayList<>();
-        UIObject h = new UIObject(); //new UiText("ADDECRG.TTF", "Z");
-        h.makeProgram(uiVertexShader, uiFragmentShader);
-        uio.add(h);
         //UIObject v = (UIObject) create(uio.get(0));
         /*v.transform.position = new Vector2(1, 1f);
         uio.add(v);*/
@@ -70,7 +56,31 @@ public class WorldRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceChanged(GL10 gl10, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
+        boolean shouldInit = Screen.screen == null;
+        Screen.screen = new Int2(width, height);
+        setup(width, height);
+        if(shouldInit) lateInit();
         camera.recalculateProjectionMatrix(width, height);
+    }
+
+    private void lateInit(){
+        camera = new Camera();
+
+        WorldObject x = new WorldObject();
+        x.makeProgram(worldVertexShader, worldFragmentShader);
+        WorldObject y = new WorldObject();
+        y.makeProgram(worldVertexShader, worldFragmentShader);
+        y.mesh = Mesh.load("samples/cube.obj");
+        y.transform.scale = Vector3.One.scale(1.2f);
+
+        GLDrawables.add(y);
+        GLDrawables.add(x);
+        //GLDrawables.add(y);
+
+        uio = new ArrayList<>();
+        UIObject h = new UiText("impact.ttf", "ignfxq IGNf");
+        //h.makeProgram(uiVertexShader, uiFragmentShader);
+        uio.add(h);
     }
 
     @Override
@@ -97,12 +107,14 @@ public class WorldRenderer implements GLSurfaceView.Renderer {
         mvpMatrix = camera.getOrthographicMatrix();
         for(UIObject ui : uio){
             ui.draw(mvpMatrix);
+            ui.transform.angle++;
         }
         GLES20.glDisable(GLES20.GL_BLEND);
         //uio.transform.angle += .1f;
     }
 
     private native void passPrivateComponents(float[] cameraForwards);
+    private native void setup(int width, int height);
 
     public static GLDrawable create(UIObject other){
         UIObject uio = other.clone();

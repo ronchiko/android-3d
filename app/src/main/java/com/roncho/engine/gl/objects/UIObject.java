@@ -35,8 +35,8 @@ public class UIObject extends GLDrawable {
 
         public Transform()
         {
-            scale = new Vector2(1, .1f);
-            position = new Vector2(0, 0);
+            scale = new Vector2(1, 1f);
+            position = new Vector2(-1f, 1f);
             buffer = new float[5];
         }
 
@@ -71,7 +71,7 @@ public class UIObject extends GLDrawable {
 
     protected abstract class Component extends ComponentBase { }
 
-    private static FloatBuffer quad, uvs;
+    protected static FloatBuffer quad, uvs;
 
     public Transform transform;
     public Texture2D texture;
@@ -82,27 +82,25 @@ public class UIObject extends GLDrawable {
     private final List<Component> components;
 
     public UIObject(){
-
-        TextAtlas atlas = TextAtlas.loadAtlas("ADDECRG.TTF");
-
-        uvs = Builder.makeRectBuffer(atlas.getChar('Z'));
+        //TextAtlas atlas = TextAtlas.loadAtlas("ADDECRG.TTF");
 
         // Prepare the static quad
         if(quad == null) {
-            quad = Builder.newFloatBuffer(8); //uvs = Builder.newFloatBuffer(8);
-            quad.put(-1f);  //uvs.put(0);
-            quad.put(1f);   //uvs.put(0);
-            quad.put(1f);   //uvs.put(1);
-            quad.put(1f);   //uvs.put(0);
-            quad.put(-1f); // uvs.put(0);
-            quad.put(-1f);  //uvs.put(1);
-            quad.put(1f);   //uvs.put(1);
-            quad.put(-1f);  //uvs.put(1);
-            quad.position(0); //uvs.position(0);
+            //uvs = Builder.makeRectBuffer(atlas.getChar('"'));
+            quad = Builder.newFloatBuffer(8); uvs = Builder.newFloatBuffer(8);
+            quad.put(-1f);  uvs.put(0);
+            quad.put(1f);   uvs.put(0);
+            quad.put(1f);   uvs.put(1);
+            quad.put(1f);   uvs.put(0);
+            quad.put(-1f);  uvs.put(0);
+            quad.put(-1f);  uvs.put(1);
+            quad.put(1f);   uvs.put(1);
+            quad.put(-1f);  uvs.put(1);
+            quad.position(0); uvs.position(0);
         }
 
         transform = new Transform();
-        texture = atlas; //Texture2D.load("pane.png");
+        texture = Texture2D.load("pane.png");
         tint = Color.white();
         children = new ArrayList<>();
         transform.resetBuffer();

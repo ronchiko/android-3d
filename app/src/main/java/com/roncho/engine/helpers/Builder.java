@@ -31,16 +31,21 @@ public class Builder {
         return bb;
     }
 
+    public static FloatBuffer makeRectBuffer(Rect rect) {
+        return makeRectBuffer(rect.toArray());
+    }
     public static FloatBuffer makeRectBuffer(float[] array){
+        if(array == null) return newFloatBuffer(0);
+
         FloatBuffer fb = newFloatBuffer(8);
         fb.put(array[0]);
-        fb.put(array[0]);
+        fb.put(array[1]);
+        fb.put(array[2]);
         fb.put(array[1]);
         fb.put(array[0]);
-        fb.put(array[0]);
-        fb.put(array[1]);
-        fb.put(array[1]);
-        fb.put(array[1]);
+        fb.put(array[3]);
+        fb.put(array[2]);
+        fb.put(array[3]);
         fb.position(0);
         return fb;
     }
