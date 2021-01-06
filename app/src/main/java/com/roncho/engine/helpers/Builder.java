@@ -1,12 +1,10 @@
 package com.roncho.engine.helpers;
 
-import android.util.Log;
-
-import com.roncho.engine.android.Logger;
 import com.roncho.engine.structs.Mesh;
-import com.roncho.engine.structs.primitive.Rect;
-import com.roncho.engine.structs.primitive.Vector2;
-import com.roncho.engine.structs.primitive.Vector3;
+import com.roncho.engine.structs.primitive.d2.Rect;
+import com.roncho.engine.structs.primitive.d2.Vector2;
+import com.roncho.engine.structs.primitive.d3.Box;
+import com.roncho.engine.structs.primitive.d3.Vector3;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -48,6 +46,24 @@ public class Builder {
         fb.put(array[3]);
         fb.position(0);
         return fb;
+    }
+
+    public static Box buildBox(Vector3... containPoints){
+        if(containPoints.length == 0) return new Box(Vector3.Zero.copy());
+
+        Vector3 max = containPoints[0].copy();
+        Vector3 min = containPoints[0].copy();
+
+        for(int i = 1; i < containPoints.length; i++){
+            max.x = MathF.max(max.x, containPoints[i].x);
+            min.x = MathF.min(min.x, containPoints[i].x);
+            max.y = MathF.max(max.y, containPoints[i].y);
+            min.y = MathF.min(min.y, containPoints[i].y);
+            max.z = MathF.max(max.z, containPoints[i].z);
+            min.z = MathF.min(min.z, containPoints[i].z);
+        }
+
+        return new Box(max.sub(min), max.sub(min).scale(.5f).add(min));
     }
 
     public static class MeshBuilder {

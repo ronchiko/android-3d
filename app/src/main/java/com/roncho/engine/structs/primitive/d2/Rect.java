@@ -1,6 +1,4 @@
-package com.roncho.engine.structs.primitive;
-
-import com.roncho.engine.android.Logger;
+package com.roncho.engine.structs.primitive.d2;
 
 public class Rect {
     public Vector2 position, size;

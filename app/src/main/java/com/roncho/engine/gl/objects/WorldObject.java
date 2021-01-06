@@ -3,13 +3,10 @@ package com.roncho.engine.gl.objects;
 import android.opengl.GLES20;
 
 import com.roncho.engine.DontSerializeField;
-import com.roncho.engine.ObjectFactory;
-import com.roncho.engine.android.Logger;
 import com.roncho.engine.structs.ComponentBase;
 import com.roncho.engine.structs.Texture2D;
-import com.roncho.engine.structs.primitive.Color;
 import com.roncho.engine.structs.primitive.Quaternion;
-import com.roncho.engine.structs.primitive.Vector3;
+import com.roncho.engine.structs.primitive.d3.Vector3;
 import com.roncho.engine.structs.Mesh;
 
 import java.util.ArrayList;
@@ -174,6 +171,9 @@ public class WorldObject extends GLDrawable {
         components = new ArrayList<>();
     }
 
+    public void update(){
+        for(Component component : components) component.onUpdate();
+    }
 
     @Override
     public void setupGraphics() {
@@ -230,5 +230,11 @@ public class WorldObject extends GLDrawable {
         GLES20.glDisableVertexAttribArray(normalAttributeHandle);
 
         transform.resetBuffer();
+    }
+
+    @Override
+    public void onDestroyed() {
+        super.onDestroyed();
+        for(Component cmp : components) cmp.onDestroy();
     }
 }

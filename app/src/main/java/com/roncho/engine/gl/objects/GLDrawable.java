@@ -60,11 +60,9 @@ public abstract class GLDrawable implements Failable {
         return failed;
     }
 
-    public static float[] rect(float x, float y, float width, float height){
-        return new float[]{x, y, width, height};
-    }
-
     @Target(ElementType.FIELD)
     @Retention(RetentionPolicy.RUNTIME)
     public @interface AutoInitiated {}
+
+    public void onDestroyed() {}
 }

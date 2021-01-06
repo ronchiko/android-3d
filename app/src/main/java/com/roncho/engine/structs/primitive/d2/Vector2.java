@@ -1,4 +1,6 @@
-package com.roncho.engine.structs.primitive;
+package com.roncho.engine.structs.primitive.d2;
+
+import com.roncho.engine.structs.primitive.d3.Vector3;
 
 public class Vector2 {
     public static final int ARRAY_SIZE = 2;

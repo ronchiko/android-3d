@@ -1,7 +1,7 @@
 package com.roncho.engine.templates.ui;
 
 import com.roncho.engine.helpers.Time;
-import com.roncho.engine.structs.primitive.Vector2;
+import com.roncho.engine.structs.primitive.d2.Vector2;
 
 /** Shows FPS */
 public class FpsText extends UiText {

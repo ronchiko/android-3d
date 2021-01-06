@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
-import android.graphics.Typeface;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 
@@ -14,9 +13,8 @@ import com.roncho.engine.android.AssetHandler;
 import com.roncho.engine.helpers.MathF;
 import com.roncho.engine.helpers.Screen;
 import com.roncho.engine.structs.Texture2D;
-import com.roncho.engine.structs.primitive.Rect;
-import com.roncho.engine.structs.primitive.Vector2;
-import com.roncho.engine.structs.primitive.Vector3;
+import com.roncho.engine.structs.primitive.d2.Rect;
+import com.roncho.engine.structs.primitive.d3.Vector3;
 
 import java.util.HashMap;
 import java.util.Objects;

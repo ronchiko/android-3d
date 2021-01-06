@@ -4,18 +4,22 @@ import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.view.MotionEvent;
 
+import com.roncho.engine.Engine;
 import com.roncho.engine.helpers.Input;
 import com.roncho.engine.structs.events.TouchEvent;
 
 public class GameRendererView extends GLSurfaceView {
 
-    public GameRendererView(Context context) {
+    private final WorldRenderer renderer;
+
+    public GameRendererView(Context context, Engine creator) {
         super(context);
 
         init();
 
         setEGLContextClientVersion(2);
-        setRenderer(new WorldRenderer());
+        renderer = new WorldRenderer(creator);
+        setRenderer(renderer);
     }
 
     public static native void init();
@@ -31,4 +35,6 @@ public class GameRendererView extends GLSurfaceView {
         performClick();
         return super.onTouchEvent(event);
     }
+
+    public WorldRenderer getRenderer() { return renderer; }
 }

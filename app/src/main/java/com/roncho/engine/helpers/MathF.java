@@ -1,6 +1,6 @@
 package com.roncho.engine.helpers;
 
-import com.roncho.engine.structs.primitive.Vector3;
+import com.roncho.engine.structs.primitive.d3.Vector3;
 
 public class MathF {
 
@@ -60,4 +60,19 @@ public class MathF {
 
     public static native float min(float a, float b);
     public static native float max(float a, float b);
+
+    public static float min(float... values){
+        float m = values[0];
+        for(int i = 1; i < values.length; i++){
+            m = min(m, values[i]);
+        }
+        return m;
+    }
+    public static float max(float... values){
+        float m = values[0];
+        for(int i = 1; i < values.length; i++){
+            m = max(m, values[i]);
+        }
+        return m;
+    }
 }

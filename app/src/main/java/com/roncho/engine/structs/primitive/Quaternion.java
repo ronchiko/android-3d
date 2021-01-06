@@ -1,8 +1,7 @@
 package com.roncho.engine.structs.primitive;
 
-import android.opengl.GLES20;
-
 import com.roncho.engine.helpers.MathF;
+import com.roncho.engine.structs.primitive.d3.Vector3;
 
 public class Quaternion {
     // Where w + xi + yj + zk
@@ -27,6 +26,10 @@ public class Quaternion {
     public Quaternion() {this(1,0,0,0);}
     public static Quaternion identity(){
         return new Quaternion(1, 0, 0, 0);
+    }
+
+    public static Quaternion euler(Vector3 axis){
+        return euler(axis.x, axis.y, axis.z);
     }
 
     /**
@@ -192,6 +195,14 @@ public class Quaternion {
     public String toString() {
         return "(" + x + ", " + y + ", " + z + ", " + w + ")";
     }
+
+    public boolean equals(Quaternion other){
+        return w == other.w && x == other.x && y == other.y && z == other.z;
+    }
+    public boolean equals(Vector3 other){
+        return equals(euler(other));
+    }
+
     public static native Quaternion parse(String str);
 
 

@@ -22,7 +22,7 @@ public class Texture2D {
         ImageFormat(int id) {
             this.id = id;
         }
-    };
+    }
 
     private final static HashMap<String, Texture2D> Cache = new HashMap<>();
 

@@ -1,6 +1,6 @@
 package com.roncho.engine.helpers;
 
-import com.roncho.engine.structs.primitive.Int2;
+import com.roncho.engine.structs.primitive.d2.Int2;
 
 public final class Screen {
 

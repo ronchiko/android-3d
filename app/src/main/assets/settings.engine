@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<engine>
+    <!-- Settings related to the audio engine -->
+    <audio>
+        <!-- The max streams the audio player can play -->
+        <maxStreams>5</maxStreams>
+    </audio>
+    <!-- Settings related to the world renderer -->
+    <world>
+        <!-- Default world shaders -->
+        <shader id="world.vertex">vertex.vert</shader>
+        <shader id="world.fragment">fragment.frag</shader>
+
+        <!-- Default ui shaders -->
+        <shader id="ui.vertex">ui/vertex.vert</shader>
+        <shader id="ui.fragment">ui/fragment.frag</shader>
+
+        <!-- global light settings -->
+        <light-ambient intensity="0.1" />
+        <light-direction direction="(0,0,1)" />
+        <light-diffuse intensity="1"/>
+        <light-specular>1</light-specular>
+    </world>
+</engine>

@@ -4,6 +4,8 @@ import com.roncho.engine.Failable;
 import com.roncho.engine.android.AssetHandler;
 import com.roncho.engine.android.Logger;
 import com.roncho.engine.helpers.Builder;
+import com.roncho.engine.structs.primitive.Quaternion;
+import com.roncho.engine.structs.primitive.d3.Vector3;
 
 import java.nio.FloatBuffer;
 import java.util.HashMap;
@@ -11,12 +13,13 @@ import java.util.HashMap;
 public class Mesh implements Failable {
 
     private class WavefrontMeshData {
-        public float[] verts, uv, norm;
+        public float[] verts, uv, norm, special;
 
         public WavefrontMeshData(){
             uvs = null;
             vertecies = null;
             normals = null;
+            special = null;
         }
 
         private native void parse(String data);
@@ -31,6 +34,11 @@ public class Mesh implements Failable {
             normals = Builder.newFloatBuffer(this.norm.length);
             normals.put(norm);
             normals.position(0);
+
+            _edges = new Vector3[special.length / 3];
+            for(int i = 0; i < _edges.length; i++){
+                _edges[i] = new Vector3(special[i * 3], special[i * 3 + 1], special[i * 3 + 2]);
+            }
         }
     }
 
@@ -39,6 +47,9 @@ public class Mesh implements Failable {
     private String path;
     private boolean failed;
     private int size;
+
+    private Vector3[] _edges;
+
     public FloatBuffer vertecies, uvs, normals;
 
     /** Creates an empty mesh with a pre allocated vertecies*/
@@ -58,7 +69,8 @@ public class Mesh implements Failable {
         }
         Logger.Log("Loading model: " + path);
         WavefrontMeshData md;
-        (md = makeMeshData()).parse(text); md.constructBuffers();
+        (md = makeMeshData()).parse(text);
+        md.constructBuffers();
         size = md.verts.length / 3;
         this.path = path;
         Cache.put(this.path, this);
@@ -79,6 +91,16 @@ public class Mesh implements Failable {
         return failed;
     }
     public int size() {return size;}
+
+    public Vector3[] edges(Quaternion rotation, Vector3 scale) {
+        Vector3[] e = new Vector3[_edges.length];
+        for(int i = 0; i < e.length; i++) {
+            e[i] = _edges[i];
+            if(!scale.equals(Vector3.One)) e[i] = e[i].scale(scale);
+            if(!rotation.equals(Quaternion.identity())) e[i] = e[i].rotate(rotation);
+        }
+        return e;
+    }
 
     private WavefrontMeshData makeMeshData(){
         return new WavefrontMeshData();

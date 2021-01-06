@@ -3,7 +3,7 @@ package com.roncho.engine.gl.objects;
 import android.opengl.Matrix;
 
 import com.roncho.engine.structs.primitive.Quaternion;
-import com.roncho.engine.structs.primitive.Vector3;
+import com.roncho.engine.structs.primitive.d3.Vector3;
 
 public class Camera {
     public class Transform {

@@ -8,7 +8,7 @@ import com.roncho.engine.helpers.MathF;
 import com.roncho.engine.structs.ComponentBase;
 import com.roncho.engine.structs.Texture2D;
 import com.roncho.engine.structs.primitive.Color;
-import com.roncho.engine.structs.primitive.Vector2;
+import com.roncho.engine.structs.primitive.d2.Vector2;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -121,6 +121,10 @@ public class UiObject extends GLDrawable {
     public void addComponent(Component c){
         components.add(c);
         c.onStart();
+    }
+
+    public void update(){
+        for(Component component : components) component.onUpdate();
     }
 
     @Override

@@ -1,4 +1,8 @@
-package com.roncho.engine.structs.primitive;
+package com.roncho.engine.structs.primitive.d3;
+
+import com.roncho.engine.structs.primitive.Quaternion;
+import com.roncho.engine.structs.primitive.d2.Int2;
+import com.roncho.engine.structs.primitive.d2.Vector2;
 
 public class Vector3 {
     public float x, y, z;
@@ -51,9 +55,14 @@ public class Vector3 {
      * @return float
      */
     public float magnitude(){
-        return (float)Math.sqrt(x * x + y * y + z * z);
+        return (float)Math.sqrt(sqrMagnitude());
     }
 
+    /**
+     * Returns the length of this vector squared
+     * @return
+     */
+    public float sqrMagnitude() { return x * x + y * y + z * z; }
     /**
      * Returns a normalized copy of this vector
      * @return Vector3
@@ -91,6 +100,9 @@ public class Vector3 {
      */
     public Vector3 scale(float s) {
         return new Vector3(x * s, y * s, z * s);
+    }
+    public Vector3 scale(Vector3 s) {
+        return new Vector3(x * s.x, y * s.y, z * s.z);
     }
 
     /**
@@ -145,5 +157,16 @@ public class Vector3 {
         return u.scale(dot(u) * 2).add(scale(scalar * scalar - u.dot(u))).add(u.cross(this).scale(2 * scalar));
     }
 
-
+    public boolean equals(Vector3 other){
+        return x == other.x && y == other.y && z == other.z;
+    }
+    public boolean equals(Int3 other){
+        return x == other.x && y == other.y && z == other.z;
+    }
+    public boolean equals(Vector2 other){
+        return z == 0 && x == other.x && y == other.y;
+    }
+    public boolean equals(Int2 other){
+        return z == 0 && x == other.x && y == other.y;
+    }
 }

@@ -3,6 +3,8 @@ package com.roncho.engine.android;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 
+import com.roncho.engine.Engine;
+import com.roncho.engine.World;
 import com.roncho.engine.gl.objects.Camera;
 import com.roncho.engine.gl.Shader;
 import com.roncho.engine.gl.objects.GLDrawable;
@@ -11,13 +13,8 @@ import com.roncho.engine.gl.objects.WorldObject;
 import com.roncho.engine.helpers.FrameRateLogger;
 import com.roncho.engine.helpers.Screen;
 import com.roncho.engine.helpers.Time;
-import com.roncho.engine.structs.Mesh;
-import com.roncho.engine.structs.primitive.Color;
-import com.roncho.engine.structs.primitive.Int2;
-import com.roncho.engine.structs.primitive.Vector2;
-import com.roncho.engine.structs.primitive.Vector3;
-import com.roncho.engine.templates.ui.FpsText;
-import com.roncho.engine.templates.ui.UiButton;
+import com.roncho.engine.structs.primitive.d2.Int2;
+import com.roncho.engine.structs.primitive.d3.Vector3;
 
 import java.util.ArrayList;
 
@@ -26,43 +23,52 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class WorldRenderer implements GLSurfaceView.Renderer {
 
-    private static Shader worldVertexShader, worldFragmentShader, uiVertexShader, uiFragmentShader;
+    public static Shader worldVertexShader, worldFragmentShader, uiVertexShader, uiFragmentShader;
+
+    private final Engine engine;
+    private final World world;
 
     private ArrayList<WorldObject> GLDrawables;
-    private ArrayList<UiObject> uio;
+    private ArrayList<UiObject> uiObjects;
     public static Camera camera;
+
+    public WorldRenderer(Engine engine) {
+        this.engine = engine;
+
+        world = new World(this);
+    }
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
         Time.begin();
         FrameRateLogger.init(60);
 
+        // Initiate layer arrays
         GLDrawables = new ArrayList<>();
+        uiObjects = new ArrayList<>();
 
+        // Initiate world lighting
         WorldObject.ambientIntensity = Vector3.One.scale(.2f);
         WorldObject.sunDirection = new Vector3(0, 1.0f, 0.0f);
         WorldObject.diffuseIntensity = Vector3.One.copy();
         WorldObject.specularConstant = new Vector3(1.0f, 1.0f, 1.0f);
 
-        worldFragmentShader =  Shader.load("fragment.frag");
-        worldVertexShader = Shader.load("vertex.vert");
-        uiVertexShader = Shader.load("ui/vertex.vert");
-        uiFragmentShader = Shader.load("ui/fragment.frag");
-
-
-        //UIObject v = (UIObject) create(uio.get(0));
-        /*v.transform.position = new Vector2(1, 1f);
-        uio.add(v);*/
-
-        // ObjectFactory.loadObject(AssetHandler.loadText("data/objects/demo.x"));
+        if(worldFragmentShader == null){
+            worldFragmentShader =  Shader.load("fragment.frag");
+            worldVertexShader = Shader.load("vertex.vert");
+            uiVertexShader = Shader.load("ui/vertex.vert");
+            uiFragmentShader = Shader.load("ui/fragment.frag");
+        }
     }
 
     @Override
     public void onSurfaceChanged(GL10 gl10, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
+
         boolean shouldInit = Screen.screen == null;
+
         Screen.screen = new Int2(width, height);
-        setup(width, height);
+
         if(shouldInit) lateInit();
         camera.recalculateProjectionMatrix(width, height);
     }
@@ -70,26 +76,7 @@ public class WorldRenderer implements GLSurfaceView.Renderer {
     private void lateInit(){
         camera = new Camera();
 
-        WorldObject x = new WorldObject();
-        x.makeProgram(worldVertexShader, worldFragmentShader);
-        WorldObject y = new WorldObject();
-        y.makeProgram(worldVertexShader, worldFragmentShader);
-        y.mesh = Mesh.load("samples/cube.obj");
-        y.transform.scale = Vector3.One.scale(1.2f);
-
-        GLDrawables.add(y);
-        GLDrawables.add(x);
-        //GLDrawables.add(y);
-
-        uio = new ArrayList<>();
-        UiObject fpsRecorder = new FpsText("impact.ttf", new Vector2(-.9f, .9f));
-        fpsRecorder.tint = Color.black();
-        //h.makeProgram(uiVertexShader, uiFragmentShader);
-        uio.add(fpsRecorder);
-        UiButton button = new UiButton(new Vector2(0, 0), new Vector2(.5f, .25f), "Epic Fortnite", "impact.ttf");
-        button.text.transform.scale = button.text.transform.scale.scale(2);
-        button.recenterText();
-        uio.add(button);
+        engine.onLoad(world);
     }
 
     @Override
@@ -108,15 +95,17 @@ public class WorldRenderer implements GLSurfaceView.Renderer {
         // uio.draw(mvpMatrix);
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         for(WorldObject d : GLDrawables){
+            d.update();
             d.draw(mvpMatrix);
-            d.transform.rotation.rotate(15 * Time.deltaTime(), 1, 1, 1);
         }
+
 
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
         GLES20.glEnable(GLES20.GL_BLEND);
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         mvpMatrix = camera.getOrthographicMatrix();
-        for(UiObject ui : uio){
+        for(UiObject ui : uiObjects){
+            ui.update();
             ui.draw(mvpMatrix);
         }
         GLES20.glDisable(GLES20.GL_BLEND);
@@ -125,12 +114,25 @@ public class WorldRenderer implements GLSurfaceView.Renderer {
         FrameRateLogger.record();
     }
 
-    private native void passPrivateComponents(float[] cameraForwards);
-    private native void setup(int width, int height);
-
     public static GLDrawable create(UiObject other){
         UiObject uio = other.clone();
         uio.makeProgram(uiVertexShader, uiFragmentShader);
         return uio;
+    }
+
+    public void register(WorldObject o, Shader vert, Shader frag){
+        GLDrawables.add(o);
+        if(vert == null) vert = worldVertexShader;
+        if(frag == null) frag = worldFragmentShader;
+
+        o.makeProgram(vert, frag);
+    }
+    public void register(UiObject o, Shader vert, Shader frag){
+        uiObjects.add(o);
+
+        if(vert == null) vert = uiVertexShader;
+        if(frag == null) frag = uiFragmentShader;
+
+        o.makeProgram(vert, frag);
     }
 }

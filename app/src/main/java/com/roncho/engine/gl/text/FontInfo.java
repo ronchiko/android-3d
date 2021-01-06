@@ -4,8 +4,8 @@ import android.graphics.Typeface;
 
 public class FontInfo {
 
-    private Typeface font;
-    private String emptyChars;
+    private final Typeface font;
+    private final String emptyChars;
 
     public FontInfo(Typeface font, String emptyChars){
         this.font = font;

@@ -7,7 +7,7 @@ import com.roncho.engine.gl.objects.UiObject;
 import com.roncho.engine.gl.text.TextAtlas;
 import com.roncho.engine.helpers.Builder;
 import com.roncho.engine.helpers.MathF;
-import com.roncho.engine.structs.primitive.Vector2;
+import com.roncho.engine.structs.primitive.d2.Vector2;
 
 import java.nio.FloatBuffer;
 

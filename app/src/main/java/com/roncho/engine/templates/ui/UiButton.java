@@ -1,13 +1,12 @@
 package com.roncho.engine.templates.ui;
 
-import com.roncho.engine.android.Logger;
 import com.roncho.engine.gl.objects.UiObject;
 import com.roncho.engine.helpers.Input;
 import com.roncho.engine.structs.Texture2D;
 import com.roncho.engine.structs.events.TouchEvent;
 import com.roncho.engine.structs.events.VoidEvent;
 import com.roncho.engine.structs.primitive.Color;
-import com.roncho.engine.structs.primitive.Vector2;
+import com.roncho.engine.structs.primitive.d2.Vector2;
 
 public class UiButton extends UiObject {
 
@@ -20,7 +19,6 @@ public class UiButton extends UiObject {
         transform.position = position;
 
         onClick = new VoidEvent();
-        onClick.add(() -> Logger.Log("You clicked me boss"));
 
         makeProgram(vertexShader, fragmentShader);
 

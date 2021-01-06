@@ -10,6 +10,7 @@ import com.roncho.engine.gl.text.FontInfo;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 public class AssetHandler {
     private static AssetManager assets;
@@ -87,5 +88,20 @@ public class AssetHandler {
         Typeface font = Typeface.createFromAsset(assets, FONTS_PATH + path);
         String echars = loadText(FONTS_PATH + path + ".DT");
         return new FontInfo(font, echars);
+    }
+
+    public static byte[] loadBytes(String path){
+        try(InputStream stream = loadRaw(path)){
+            int length = stream.available();
+            Logger.Log("Opening files");
+            byte[] array = new byte[length];
+            for(int i = 0; i < array.length; i++)
+                array[i] = (byte)stream.read();
+            Logger.Log("Data: " + array.length);
+            return array;
+        }catch (IOException e){
+            Logger.Log(e.getMessage());
+            return null;
+        }
     }
 }

@@ -1,4 +1,4 @@
-package com.roncho.engine.structs.primitive;
+package com.roncho.engine.structs.primitive.d3;
 
 public class Int3 {
     public int x, y, z;

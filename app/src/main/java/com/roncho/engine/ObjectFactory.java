@@ -1,20 +1,15 @@
 package com.roncho.engine;
 
-import android.icu.text.UnicodeSetSpanner;
-import android.util.Log;
-
 import com.roncho.engine.android.Logger;
 import com.roncho.engine.gl.objects.GLDrawable;
-import com.roncho.engine.gl.objects.WorldObject;
 import com.roncho.engine.structs.ComponentBase;
 import com.roncho.engine.structs.Mesh;
 import com.roncho.engine.structs.Texture2D;
-import com.roncho.engine.structs.primitive.Int3;
+import com.roncho.engine.structs.primitive.d3.Int3;
 import com.roncho.engine.structs.primitive.Quaternion;
-import com.roncho.engine.structs.primitive.Vector2;
-import com.roncho.engine.structs.primitive.Vector3;
+import com.roncho.engine.structs.primitive.d2.Vector2;
+import com.roncho.engine.structs.primitive.d3.Vector3;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -132,7 +127,7 @@ public class ObjectFactory {
         Float,
         Int;
 
-        private char filler;
+        private final char filler;
 
         TokenType(char filler) {this.filler = filler;}
         TokenType() {this(' ');}
@@ -166,7 +161,7 @@ public class ObjectFactory {
     }
 
     private static class Lexer {
-        private Queue<Token> tokens;
+        private final Queue<Token> tokens;
 
         public Lexer(){
             tokens = new ArrayDeque<>();
@@ -228,7 +223,7 @@ public class ObjectFactory {
     }
 
     public static class Parser {
-        private Lexer lexer;
+        private final Lexer lexer;
 
         public Parser(Lexer lexer){
             this.lexer = lexer;

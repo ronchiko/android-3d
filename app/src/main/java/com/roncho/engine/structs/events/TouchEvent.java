@@ -3,7 +3,7 @@ package com.roncho.engine.structs.events;
 import android.view.MotionEvent;
 
 import com.roncho.engine.helpers.Screen;
-import com.roncho.engine.structs.primitive.Vector2;
+import com.roncho.engine.structs.primitive.d2.Vector2;
 
 public class TouchEvent extends Event<TouchEvent.TouchEventInfo> {
 

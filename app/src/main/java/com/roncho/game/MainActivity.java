@@ -1,24 +1,23 @@
 package com.roncho.game;
 
-import androidx.appcompat.app.AppCompatActivity;
+import com.roncho.engine.Engine;
+import com.roncho.engine.World;
+import com.roncho.engine.audio.AudioClip;
+import com.roncho.engine.audio.AudioEngine;
+import com.roncho.engine.audio.AudioStreamPlayer;
+import com.roncho.engine.gl.objects.WorldObject;
 
-import android.os.Bundle;
-
-import com.roncho.engine.android.AssetHandler;
-import com.roncho.engine.android.GameRendererView;
-
-public class MainActivity extends AppCompatActivity {
-
-    // Used to load the 'native-lib' library on application startup.
-    static {
-        System.loadLibrary("native-lib");
-    }
+public class MainActivity extends Engine {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        AssetHandler.init(getAssets(), getBaseContext());
-        setContentView(new GameRendererView(getBaseContext()));
-    }
+    public void onLoad(World world) {
 
+        WorldObject object = new WorldObject();
+        world.register(object);
+
+        AudioClip clip = AudioClip.load("sound.wav");
+        AudioStreamPlayer streamPlayer = clip.play();
+        streamPlayer.stop();
+        streamPlayer.resume();
+    }
 }

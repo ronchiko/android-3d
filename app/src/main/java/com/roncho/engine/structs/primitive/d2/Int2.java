@@ -1,4 +1,4 @@
-package com.roncho.engine.structs.primitive;
+package com.roncho.engine.structs.primitive.d2;
 
 public class Int2 {
 
@@ -28,4 +28,6 @@ public class Int2 {
     public Int2 sub(Int2 other){
         return new Int2(x - other.x, y - other.y);
     }
+
+    public static native Int2 parse(String value);
 }
